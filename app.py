@@ -4,29 +4,6 @@ from flask import request
 import sqlite3
 import json
 
-data = {
-'workshops': [
-    {
-        'id': '1',
-        'name': 'hand building',
-        'details': 'one piece upto 5 inch',
-        'duration': '2hrs',
-        'fees': 'INR 999 + GST',
-        'maxCapacity': 4
-    },
-    {
-        'id': '2',
-        'name': 'wheel building',
-        'details': 'one piece upto 5 inch',
-        'duration': '2hrs',
-        'fees': 'INR 1399 + GST',
-        'maxCapacity': 4
-    }
-],
-'bookings': [],
-'slots': []
-}
-
 app = Flask(__name__)
 
 @app.route('/hello', methods=['GET'])
@@ -35,77 +12,44 @@ def hello():
 
 @app.route('/workshops', methods=['GET'])
 def getWorkshops():
-    pass
+    conn = sqlite3.connect("data.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    try:
+        res = cur.execute("SELECT id, name, description, duration, fees, max_capacity FROM WORKSHOPS")
+        rows = res.fetchall()
+        workshops = [dict(row) for row in rows]
+        return workshops
+    except Exception as e:
+        print(traceback.format_exc())
+        return 'server-error', 500
+    finally:
+        conn.close()
 
 @app.route('/workshop/<id>', methods=['GET'])
-def getWorkshop():
-    pass
+def getWorkshop(id):
+    conn = sqlite3.connect("data.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    try:
+        res = cur.execute("SELECT id, name, description, duration, fees, max_capacity FROM WORKSHOPS WHERE id=?", (id,))
+        rows = res.fetchall()
+        workshops = [dict(row) for row in rows]
+        if len(workshops)>0:
+            return workshops[0]
+        return {}
+    except Exception as e:
+        print(traceback.format_exc())
+        return 'server-error', 500
+    finally:
+        conn.close()
 
 @app.route('/book-workshop', methods=['POST'])
 def bookWorkshop():
     print(request)
     print(request.url)
     print(request.form['workshop-id'])
-    return 'success`'
-
-
-# @app.route('/workshop-details')
-# def getWorkshopDetails():
-#     return json.dumps(workshops)
-
-# @app.route('/book-workshop/123')
-# def bookWorkshop():
-#     workshopId = '1'
-#     workshopDate = '20-Nov-2024'
-#     workshopTime = '12PM'
-#     noOfPeople = '2'
-#     if checkSlotAvailibility(workshopId, workshopDate, workshopTime):
-#         slots.append({
-#             'workshopId': workshopId,
-#             'date': workshopDate,
-#             'time': workshopTime,
-#             'bookedCnt': 1
-#         })
-#         # process payment
-#         paymentId = 'ABC123'
-#         bookings.append({
-#             'id': 1,
-#             'workshopId': workshopId,
-#             'workshopDate': workshopDate,
-#             'workshopTime': workshopTime,
-#             'noOfPeople': noOfPeople,
-#             'paymentId': paymentId
-#         })
-#         return 'Hurray! Your booking is confirmed!'
-#     else:
-#         return 'Sorry! This slot is just booked, please check other slots.'
-
-# def getMaxCapacity(workshopId):
-#     for workshop in workshops:
-#         if workshop['id']==workshopId:
-#             return workshop['maxCapacity']
-#     return -1
-
-# def checkSlotAvailibility(workshopId, date, time):
-    isAvailable = True
-    for slot in slots:
-        if slot['workshopId']==workshopId and slot['date']==date and slot['time']==time:
-            if slot['bookedCnt'] >= getMaxCapacity(workshopId):
-                isAvailable = False
-                break
-    return isAvailable
-
-workshops = []
-bookings = []
-slots = []
-
-def loadData():
-    for workshop in data['workshops']:
-        workshops.append(workshop)
-    for booking in data['bookings']:
-        bookings.append(booking)
-    for slot in data['slots']:
-        slots.append(slot)
+    return 'success'
 
 def createWorkshops():
     conn = sqlite3.connect("data.db")
@@ -183,8 +127,9 @@ def createSlots():
 
 
 def main():
-    createWorkshops()
-    createBookings()
-    createSlots()
+    print('Starting the application...')
+    # createWorkshops()
+    # createBookings()
+    # createSlots()
 
 main()
