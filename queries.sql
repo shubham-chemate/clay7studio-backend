@@ -32,3 +32,9 @@ CREATE TABLE slots (
 
 INSERT INTO slots VALUES
 (1, 1731857400, 1)
+
+
+SELECT max_capacity, booked
+FROM workshops w
+INNER JOIN slots s ON w.id = s.workshop_id
+WHERE w.id=1
