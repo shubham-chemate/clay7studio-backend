@@ -1,4 +1,4 @@
-def getWorkshops():
+def getWorkshops_():
     # conn = sqlite3.connect("data.db")
     # conn.row_factory = sqlite3.Row
     # cur = conn.cursor()
@@ -12,7 +12,32 @@ def getWorkshops():
     #     return 'server-error', 500
     # finally:
     #     conn.close()
-    return []
+    return [
+        {
+            'id': 'workshop-clay',
+            'title': 'Fun With Clay',
+            'shortDescription': 'Create Beautiful Pottery Art Using Clay!',
+            'duration': '2 Hrs',
+            'fees': 'INR 999/-',
+            'maxCapacityPerSlot': 4
+        },
+        {
+            'id': 'workshop-wheel',
+            'title': 'Fun With Wheel',
+            'shortDescription': 'Experience Magic of Wheel and Create Beautiful Pottery Art!',
+            'duration': '2 Hrs',
+            'fees': 'INR 1399/-',
+            'maxCapacityPerSlot': 4
+        },
+        {
+            'id': 'workshop-group',
+            'title': 'Fun Together',
+            'shortDescription': 'Experience Magic of Hand Clay as well as Wheel Pottery and let your inner article get excited!',
+            'duration': '2 Hrs',
+            'fees': 'INR 2499/-',
+            'maxCapacityPerSlot': 4
+        },
+    ]
 
 def getWorkshopDetails(id, workshopDate):
     # conn = sqlite3.connect("data.db")
@@ -30,7 +55,7 @@ def getWorkshopDetails(id, workshopDate):
     #     return 'server-error', 500
     # finally:
     #     conn.close()
-    {
+    return {
         'title': 'Fun With Clay',
         'shortDescription': "Create beatiful pottery art with your hands, don't worry we are there to help you!",
         'duration': '2 Hrs',
@@ -46,7 +71,7 @@ def getWorkshopDetails(id, workshopDate):
         'selectedDate': 'Wed, 26 Nov',
         'availableSlots': ['12PM to 2PM', '2PM to 4PM', '4PM to 6PM', '6PM to 8PM']
     }
-    return {}
+    # return {}
 
 def bookWorkshop():
         # workshop_id = request.form['workshop-id']
