@@ -8,19 +8,20 @@ def createWorkshops():
     try:
         res = cur.execute("""
             CREATE TABLE workshops (
-                id INTEGER,
-                name TEXT,
-                description TEXT,
+                id TEXT,
+                title TEXT,
+                shortDescription TEXT,
                 duration INTEGER,
                 fees REAL,
-                max_capacity REAL
+                max_capacity INTEGER
             )
         """)
 
         cur.execute("""
             INSERT INTO workshops VALUES
-            (1, 'Hand Building', 'workshop-desc', 120, 999.0, 4),
-            (2, 'Wheel Building', 'workshop-desc', 120, 1399.0, 4)
+            ('workshop-clay', 'Fun With Clay', 'Create Beautiful Pottery Art Using Clay!', 120, 999.0, 4),
+            ('workshop-wheel', 'Fun With Wheel', 'Experience Magic of Wheel and Create Beautiful Pottery Art!', 120, 1399.0, 4),
+            ('workshop-clay-and-wheel', 'Fun Together', 'Experience Magic of Hand Clay as well as Wheel Pottery and let your inner article get excited!', 240, 2499.0, 4)
         """)
         conn.commit()
 
@@ -28,6 +29,8 @@ def createWorkshops():
         print(res.fetchall())
     except Exception as e :
         print(e)
+
+createWorkshops()
 
 def createBookings():
     conn = sqlite3.connect("data.db")
