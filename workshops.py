@@ -1,43 +1,21 @@
+import sqlite3
+import traceback
+
 def getWorkshops_():
-    # conn = sqlite3.connect("data.db")
-    # conn.row_factory = sqlite3.Row
-    # cur = conn.cursor()
-    # try:
-    #     res = cur.execute("SELECT id, name, description, duration, fees, max_capacity FROM WORKSHOPS")
-    #     rows = res.fetchall()
-    #     workshops = [dict(row) for row in rows]
-    #     return workshops
-    # except Exception as e:
-    #     print(traceback.format_exc())
-    #     return 'server-error', 500
-    # finally:
-    #     conn.close()
-    return [
-        {
-            'id': 'workshop-clay',
-            'title': 'Fun With Clay',
-            'shortDescription': 'Create Beautiful Pottery Art Using Clay!',
-            'duration': '2 Hrs',
-            'fees': 'INR 999/-',
-            'maxCapacityPerSlot': 4
-        },
-        {
-            'id': 'workshop-wheel',
-            'title': 'Fun With Wheel',
-            'shortDescription': 'Experience Magic of Wheel and Create Beautiful Pottery Art!',
-            'duration': '2 Hrs',
-            'fees': 'INR 1399/-',
-            'maxCapacityPerSlot': 4
-        },
-        {
-            'id': 'workshop-group',
-            'title': 'Fun Together',
-            'shortDescription': 'Experience Magic of Hand Clay as well as Wheel Pottery and let your inner article get excited!',
-            'duration': '2 Hrs',
-            'fees': 'INR 2499/-',
-            'maxCapacityPerSlot': 4
-        },
-    ]
+    conn = sqlite3.connect("data.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    try:
+        res = cur.execute("SELECT id, title, shortDescription, duration, fees FROM WORKSHOPS")
+        cols = [desc[0] for desc in res.description]
+        rows = res.fetchall()
+        workshops = [dict(zip(cols, row)) for row in rows]
+        return workshops
+    except Exception as e:
+        print(traceback.format_exc())
+        return 'server-error', 500
+    finally:
+        conn.close()
 
 def getWorkshopDetails(id, workshopDate):
     # conn = sqlite3.connect("data.db")

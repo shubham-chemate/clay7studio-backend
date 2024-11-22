@@ -30,6 +30,12 @@ def hello():
 @app.route('/workshops', methods=['GET'])
 def getWorkshops():
     workshops = getWorkshops_()
+    for workshop in workshops:
+        workshop['fees'] = 'INR ' + str(workshop['fees']) + '/-'
+        fDuration = str(workshop['duration']//60) + " Hrs"
+        if workshop['duration']%60 != 0:
+            fDuration += " " + str(int(workshop['duration']%60)) + " Mins"
+        workshop['duration'] = fDuration
     return render_template('workshops.html', workshops=workshops)
 
 @app.route('/workshop/<id>/<workshopDate>', methods=['GET'])

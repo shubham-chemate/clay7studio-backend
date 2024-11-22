@@ -12,16 +12,16 @@ def createWorkshops():
                 title TEXT,
                 shortDescription TEXT,
                 duration INTEGER,
-                fees REAL,
-                max_capacity INTEGER
+                fees INTEGER,
+                maxCapacity INTEGER
             )
         """)
 
         cur.execute("""
             INSERT INTO workshops VALUES
-            ('workshop-clay', 'Fun With Clay', 'Create Beautiful Pottery Art Using Clay!', 120, 999.0, 4),
-            ('workshop-wheel', 'Fun With Wheel', 'Experience Magic of Wheel and Create Beautiful Pottery Art!', 120, 1399.0, 4),
-            ('workshop-clay-and-wheel', 'Fun Together', 'Experience Magic of Hand Clay as well as Wheel Pottery and let your inner article get excited!', 240, 2499.0, 4)
+            ('workshop-clay', 'Fun With Clay', 'Create Beautiful Pottery Art Using Clay!', 120, 999, 4),
+            ('workshop-wheel', 'Fun With Wheel', 'Experience Magic of Wheel and Create Beautiful Pottery Art!', 120, 1399, 4),
+            ('workshop-clay-and-wheel', 'Fun Together', 'Experience Magic of Hand Clay as well as Wheel Pottery and let your inner article get excited!', 240, 2499, 4)
         """)
         conn.commit()
 
