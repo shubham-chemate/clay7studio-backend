@@ -50,3 +50,6 @@ def bookWorkshop():
     if bookWorkshop():
         return "success"
     return "there was an error"
+
+if __name__ == '__main__':
+    app.run(debug=True)
