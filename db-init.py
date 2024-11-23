@@ -116,7 +116,7 @@ def createSlots():
             CREATE TABLE SLOTS (
                 workshopId TEXT,
                 workshopStartTime INTEGER,
-                slotsBooked INTEGER
+                slotsRem INTEGER
             )
         """)
 
@@ -136,7 +136,7 @@ def createSlots():
 
                     cur.execute("""
                         INSERT INTO slots VALUES
-                        (?, ?, 0)
+                        (?, ?, 4)
                     """, (workshopId, dt.timestamp(),))
                     conn.commit()
 
