@@ -49,6 +49,13 @@ def validateDate(date):
         print(e)
     return False
 
+# 2024-11-23 -> Sat, 23 Nov
+@app.template_filter('formatDate')
+def formatDate(date):
+    dateObj = datetime.strptime(date, '%Y-%m-%d')
+    date = dateObj.strftime('%a, %d %b')
+    return date
+
 @app.route('/workshop/<id>/<workshopDate>', methods=['GET'])
 def getWorkshop(id, workshopDate):
     print(id, workshopDate)
@@ -65,13 +72,6 @@ def getWorkshop(id, workshopDate):
     if workshopDetails['duration']%60 != 0:
         fDuration += " " + str(int(workshopDetails['duration']%60)) + " Mins"
     workshopDetails['duration'] = fDuration
-    
-    fdates = []
-    for date in workshopDetails['dates']:
-        dateObj = datetime.strptime(date, '%Y-%m-%d')
-        date = dateObj.strftime('%a, %d %b')
-        fdates.append(date)
-    workshopDetails['dates']=fdates
 
     fslots = []
     for slot in workshopDetails['availableSlots']:
@@ -81,9 +81,6 @@ def getWorkshop(id, workshopDate):
             tm = dtmObj.strftime('%I:%M %p')
             fslots.append(tm)
     workshopDetails['availableSlots']=fslots
-
-    fselectedDateObj = datetime.strptime(workshopDetails['selectedDate'], '%Y-%m-%d')
-    workshopDetails['selectedDate'] = fselectedDateObj.strftime('%a, %d %b')
 
     # return workshopDetails
     return render_template('workshop.html', workshopDetails=workshopDetails)
