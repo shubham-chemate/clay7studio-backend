@@ -69,8 +69,6 @@ def getWorkshopDetails(id, workshopDate):
     finally:
         conn.close()
 
-    return {}
-
 def bookWorkshop():
         # workshop_id = request.form['workshop-id']
     # slot_datetime = request.form['slot-datetime']
