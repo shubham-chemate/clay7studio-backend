@@ -54,12 +54,12 @@ def getWorkshopDetails(id, workshopDate):
         workshop['selectedDate']=workshopDate
 
         res = cur.execute("""
-            select workshopStartTime, slotsBooked
+            select workshopStartTime, slotsRem
             from slots
             where workshopId=? and date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') = ?;
         """, (id, workshopDate,))
         rows = res.fetchall()
-        slots=[dict(zip(['startTime', 'booked'], row)) for row in rows]
+        slots=[dict(zip(['startTime', 'slotsRem'], row)) for row in rows]
         workshop['availableSlots']=slots
 
         return workshop
