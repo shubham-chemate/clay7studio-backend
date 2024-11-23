@@ -196,7 +196,7 @@
         <form action="/book-workshop" method="post">
           {% if workshopDetails['dates']|length() %}
           <div class="mb-2">
-            <div class="text-start fst-italic">Choose Date</div>
+            <div class="text-start fst-italic">Select Date</div>
             <div class="d-flex justify-content-start align-items-center">
               {% for date in workshopDetails['dates'] %}
               <a
@@ -208,12 +208,12 @@
             </div>
           </div>
           <div class="mt-2 mb-4">
-            <div class="text-start fst-italic">Choose Time</div>
+            <div class="text-start fst-italic">Choose Slot</div>
             <div class="d-flex justify-content-start align-items-center">
               {% for slot in workshopDetails['availableSlots'] %} <input
               type="radio" class="btn-check" name="workshop-slot"
-              id="slot{{loop.index0}}" autocomplete="off" {% if loop.index0 == 0
-              %} checked {% endif %} />
+              value="{{slot}}" id="slot{{loop.index0}}" autocomplete="off" {% if
+              loop.index0 == 0 %} checked {% endif %} />
               <label
                 class="btn mx-1 p-1"
                 for="slot{{loop.index0}}"
@@ -231,9 +231,28 @@
 
           <div class="mb-2 row">
             <label
+              for="workshop-reg-name"
+              class="col-sm-4 col-form-label text-end"
+              >Your Name<br />
+            </label>
+            <div class="col-sm-6">
+              <input
+                type="text"
+                class="form-control"
+                id="workshop-reg-name"
+                name="userName"
+                required
+              />
+            </div>
+            <div class="col p-0 m-0 text-start text-secondary fst-italic">
+              Mandatory
+            </div>
+          </div>
+          <div class="mb-2 row">
+            <label
               for="workshop-reg-contact"
               class="col-sm-4 col-form-label text-end"
-              >Contact Number
+              >Contact Number <br />
             </label>
             <div class="col-sm-6">
               <input
@@ -241,6 +260,7 @@
                 class="form-control"
                 id="workshop-reg-contact"
                 name="contact-number"
+                required
               />
             </div>
             <div class="col p-0 m-0 text-start text-secondary fst-italic">
@@ -265,6 +285,18 @@
               Optional
             </div>
           </div>
+
+          <input
+            type="hidden"
+            name="workshopId"
+            value="{{workshopDetails['id']}}"
+          />
+          <input
+            type="hidden"
+            name="workshopDate"
+            value="{{workshopDetails['selectedDate']}}"
+          />
+
           <button class="btn btn-outline-dark rounded-0">
             Proceed to Checkout
           </button>
