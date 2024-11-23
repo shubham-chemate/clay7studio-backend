@@ -43,7 +43,8 @@ def getWorkshop(id, workshopDate):
     workshopDetails = getWorkshopDetails(id, workshopDate)
     if workshopDetails is None or workshopDetails == {}:
         return 'not-found', 404
-    return render_template('workshop.html', workshopDetails=workshopDetails)
+    return workshopDetails
+    # return render_template('workshop.html', workshopDetails=workshopDetails)
 
 @app.route('/book-workshop', methods=['POST'])
 def bookWorkshop():
