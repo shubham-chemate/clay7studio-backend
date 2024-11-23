@@ -145,7 +145,7 @@
                   <a
                     class="nav-link header-option"
                     style="color: rgb(255, 84, 49)"
-                    href="./workshops.html"
+                    href="{{url_for('getWorkshops')}}"
                     >WORKSHOPS</a
                   >
                   <a class="nav-link header-option" href="./events.html"
@@ -171,20 +171,20 @@
       <div class="p-4" style="background-color: #fef7eb">
         <div class="fs-2">{{workshopDetails['title']}}</div>
         <div class="m-0 p-0">{{workshopDetails['shortDescription']}}</div>
-        <div class="mt-5">
+        <div class="mt-4">
           <div class="fs-5">What we have there for you!</div>
           <div class="d-flex mt-2 align-items-center justify-content-center">
             <div class="text-start w-75">
               <ul>
                 {% for descPoint in workshopDetails['description'] %}
-                <li>{{ descPoint }}</li>
+                <li class="lh-sm">{{ descPoint }}</li>
                 {% endfor %}
               </ul>
             </div>
           </div>
         </div>
 
-        <div class="row justify-content-center mb-5">
+        <div class="row justify-content-center mb-4">
           <div class="col-auto border mx-3 p-2 fw-bold">
             Duration: {{workshopDetails['duration']}}
           </div>
@@ -199,7 +199,7 @@
             <div class="text-start fst-italic">Choose Date</div>
             <div class="d-flex justify-content-start align-items-center">
               {% for date in workshopDetails['dates'] %} <input type="radio"
-              class="btn-check" name="{{date}}" id="day{{loop.index0}}"
+              class="btn-check" name="workshop-date" id="day{{loop.index0}}"
               autocomplete="off" {% if workshopDetails['selectedDate'] == date
               %} checked {% endif %} />
               <label
@@ -211,11 +211,11 @@
               {% endfor %}
             </div>
           </div>
-          <div class="mt-2 mb-5">
+          <div class="mt-2 mb-4">
             <div class="text-start fst-italic">Choose Time</div>
             <div class="d-flex justify-content-start align-items-center">
               {% for slot in workshopDetails['availableSlots'] %} <input
-              type="radio" class="btn-check" name="{{slot}}"
+              type="radio" class="btn-check" name="workshop-slot"
               id="slot{{loop.index0}}" autocomplete="off" {% if loop.index0 == 0
               %} checked {% endif %} />
               <label

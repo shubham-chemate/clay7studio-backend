@@ -144,7 +144,7 @@
                   <a
                     class="nav-link header-option"
                     style="color: rgb(255, 84, 49)"
-                    href="./workshops.html"
+                    href="{{url_for('getWorkshops')}}"
                     >WORKSHOPS</a
                   >
                   <a class="nav-link active header-option" href="./events.html"
@@ -178,7 +178,7 @@
           <div class="col-8 m-0 p-3" style="background-color: #fef7eb">
             <div class="fs-5 fw-bold">{{workshop["title"]}}</div>
             <div>{{workshop["shortDescription"]}}</div>
-            <a href="./workshop/{{workshop["id"]}}/nearest-date">
+            <a href="./workshop/{{workshop["id"]}}/nearest">
               <button type="button" class="btn btn-outline-dark rounded-0 mt-2">
                 More Details
               </button>
