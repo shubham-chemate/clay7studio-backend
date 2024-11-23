@@ -1,11 +1,15 @@
 import traceback
 import sqlite3
+from datetime import datetime
 
 
 def createWorkshops():
     conn = sqlite3.connect("data.db")
     cur = conn.cursor()
     try:
+        cur.execute("DROP TABLE IF EXISTS workshops")
+        conn.commit()
+
         res = cur.execute("""
             CREATE TABLE workshops (
                 id TEXT,
@@ -105,18 +109,36 @@ def createSlots():
     conn = sqlite3.connect("data.db")
     cur = conn.cursor()
     try:
+        cur.execute("DROP TABLE IF EXISTS SLOTS")
+        conn.commit()
+
         res = cur.execute("""
-            CREATE TABLE slots (
-                workshop_id INTEGER,
-                date_time INTEGER,
-                booked INTEGER
+            CREATE TABLE SLOTS (
+                workshopId TEXT,
+                workshopStartTime INTEGER,
+                slotsBooked INTEGER
             )
         """)
-        cur.execute("""
-            INSERT INTO slots VALUES
-            (1, 1731857400, 1)
-        """)
-        conn.commit()
+
+        for workshopId in ['workshop-clay', 'workshop-wheel', 'workshop-clay-and-wheel']:
+            for day in range(19, 33):
+                for tm in [12, 14, 16, 18]:
+                    d = day%30
+                    if d==0:
+                        d=30
+                    if d==2 or d==25: # Monday -> holiday
+                        continue
+                    
+                    month=11
+                    if d<19:
+                        month+=1
+                    dt = datetime(2024, month, d, tm, 0, 0)
+
+                    cur.execute("""
+                        INSERT INTO slots VALUES
+                        (?, ?, 0)
+                    """, (workshopId, dt.timestamp(),))
+                    conn.commit()
 
         res = cur.execute("SELECT * FROM slots")
         print(res.fetchall())
@@ -124,5 +146,6 @@ def createSlots():
         print(traceback.format_exc())
 
 
-# createWorkshops()
+createWorkshops()
 createWorkshopDescription()
+createSlots()
