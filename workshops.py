@@ -28,15 +28,39 @@ def getWorkshopDetails(id, workshopDate):
 
         if len(workshops)<=0:
             return {}
-
         workshop = workshops[0]
 
         res = cur.execute("SELECT workshopDesc FROM WORKSHOP_DESC WHERE workshopId=? ORDER BY displayPriority", (id,))
         rows = res.fetchall()
         desc = [row[0] for row in rows]
-
         if len(desc)>0:
             workshop['description']=desc
+
+        res = cur.execute("""
+                        SELECT distinct date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') as workshopTime 
+                        FROM SLOTS 
+                        WHERE workshopId=? and workshopStartTime > strftime('%s', 'now', 'start of day', '+0 hours', 'localtime')
+                        LIMIT 6;
+                    """, (id,))
+        rows = res.fetchall()
+        dates = [row[0] for row in rows]
+        workshop['dates']=dates
+        if len(dates)<=0:
+            return workshop
+
+        if workshopDate == "nearest":
+            workshopDate = dates[0]
+
+        workshop['selectedDate']=workshopDate
+
+        res = cur.execute("""
+            select workshopStartTime, slotsBooked
+            from slots
+            where workshopId=? and date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') = ?;
+        """, (id, workshopDate,))
+        rows = res.fetchall()
+        slots=[dict(zip(['startTime', 'booked'], row)) for row in rows]
+        workshop['availableSlots']=slots
 
         return workshop
     except Exception as e:
@@ -45,24 +69,7 @@ def getWorkshopDetails(id, workshopDate):
     finally:
         conn.close()
 
-
-    return {
-        'title': 'Fun With Clay',
-        'shortDescription': "Create beatiful pottery art with your hands, don't worry we are there to help you!",
-        'duration': '2 Hrs',
-        'fees': '999/- + GST',
-        'description': [
-            'You will get to craft 1 Piece (usually upto 5 inch)',
-            'You can create Plate, Planter, Mug, Pen Stand or any creative art of your own idea',
-            'You will get Glazed Product',
-            'You will receive your final product within 2 weeks',
-            'If you are multiple people attending workshop, please book separately for each'
-        ],
-        'dates': ['Tue, 25 Nov','Wed, 26 Nov','Thu, 27 Nov','Fri, 28 Nov','Sat, 29 Nov','Sun, 30 Nov'],
-        'selectedDate': 'Wed, 26 Nov',
-        'availableSlots': ['12PM to 2PM', '2PM to 4PM', '4PM to 6PM', '6PM to 8PM']
-    }
-    # return {}
+    return {}
 
 def bookWorkshop():
         # workshop_id = request.form['workshop-id']
