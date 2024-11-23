@@ -87,9 +87,27 @@ def getWorkshop(id, workshopDate):
 
 @app.route('/book-workshop', methods=['POST'])
 def bookWorkshop():
+    userContact = request.form['userContact']
+    userName = request.form['userName']
+    userEmail = request.form['userEmail']
+    workshopId = request.form['workshopId']
+    workshopDate = request.form['workshopDate']
+    workshopSlot = request.form['workshop-slot']
+
+    if userContact is None or userContact == '':
+        return 'No user contact is given', 400
+    if userName is None or userName == '':
+        return 'No username is given', 400
+    if workshopId is None or workshopId == '':
+        return 'WorkshopId is not present', 400
+    if workshopDate is None or workshopDate == '':
+        return 'WorkshopDate is not present', 400
+    if workshopSlot is None or workshopSlot == '':
+        return 'WorkshopSlot is not present'
+
     # if bookWorkshop():
     #     return "success"
-    return "there was an error"
+    return "booking-in-progress"
 
 if __name__ == '__main__':
     app.run(debug=True)
