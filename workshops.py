@@ -18,21 +18,34 @@ def getWorkshops_():
         conn.close()
 
 def getWorkshopDetails(id, workshopDate):
-    # conn = sqlite3.connect("data.db")
-    # conn.row_factory = sqlite3.Row
-    # cur = conn.cursor()
-    # try:
-    #     res = cur.execute("SELECT id, name, description, duration, fees, max_capacity FROM WORKSHOPS WHERE id=?", (id,))
-    #     rows = res.fetchall()
-    #     workshops = [dict(row) for row in rows]
-    #     if len(workshops)>0:
-    #         return workshops[0]
-    #     return {}
-    # except Exception as e:
-    #     print(traceback.format_exc())
-    #     return 'server-error', 500
-    # finally:
-    #     conn.close()
+    conn = sqlite3.connect("data.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    try:
+        res = cur.execute("SELECT id, title, shortDescription, duration, fees FROM WORKSHOPS WHERE id=?", (id,))
+        rows = res.fetchall()
+        workshops = [dict(row) for row in rows]
+
+        if len(workshops)<=0:
+            return {}
+
+        workshop = workshops[0]
+
+        res = cur.execute("SELECT workshopDesc FROM WORKSHOP_DESC WHERE workshopId=? ORDER BY displayPriority", (id,))
+        rows = res.fetchall()
+        desc = [row[0] for row in rows]
+
+        if len(desc)>0:
+            workshop['description']=desc
+
+        return workshop
+    except Exception as e:
+        print(traceback.format_exc())
+        return 'server-error', 500
+    finally:
+        conn.close()
+
+
     return {
         'title': 'Fun With Clay',
         'shortDescription': "Create beatiful pottery art with your hands, don't worry we are there to help you!",
@@ -40,7 +53,7 @@ def getWorkshopDetails(id, workshopDate):
         'fees': '999/- + GST',
         'description': [
             'You will get to craft 1 Piece (usually upto 5 inch)',
-            'You can create Plate, Planter, Mug, Pen Stand or any creative idea of your own',
+            'You can create Plate, Planter, Mug, Pen Stand or any creative art of your own idea',
             'You will get Glazed Product',
             'You will receive your final product within 2 weeks',
             'If you are multiple people attending workshop, please book separately for each'
