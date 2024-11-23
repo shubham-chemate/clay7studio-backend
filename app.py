@@ -54,27 +54,17 @@ def getWorkshop(id, workshopDate):
     print(id, workshopDate)
     if workshopDate != 'nearest' and not validateDate(workshopDate):
         return 'bad-request', 400
-    
-    # workshopDetails = {
-    #     'title': 'Fun With Clay',
-    #     'shortDescription': "Create beatiful pottery art with your hands, don't worry we are there to help you!",
-    #     'duration': '2 Hrs',
-    #     'fees': '999/- + GST',
-    #     'description': [
-    #         'You will get to craft 1 Piece (usually upto 5 inch)',
-    #         'You can create Plate, Planter, Mug, Pen Stand or any creative art of your own idea',
-    #         'You will get Glazed Product',
-    #         'You will receive your final product within 2 weeks',
-    #         'If you are multiple people attending workshop, please book separately for each'
-    #     ],
-    #     'dates': ['Tue, 25 Nov','Wed, 26 Nov','Thu, 27 Nov','Fri, 28 Nov','Sat, 29 Nov','Sun, 30 Nov'],
-    #     'selectedDate': 'Wed, 26 Nov',
-    #     'availableSlots': ['12PM to 2PM', '2PM to 4PM', '4PM to 6PM', '6PM to 8PM']
-    # }
 
     workshopDetails = getWorkshopDetails(id, workshopDate)
     if workshopDetails is None or workshopDetails == {}:
         return 'not-found', 404
+    
+    workshopDetails['fees'] = 'INR '+str(workshopDetails['fees'])+'/-'
+    
+    fDuration = str(workshopDetails['duration']//60) + " Hrs"
+    if workshopDetails['duration']%60 != 0:
+        fDuration += " " + str(int(workshopDetails['duration']%60)) + " Mins"
+    workshopDetails['duration'] = fDuration
     
     fdates = []
     for date in workshopDetails['dates']:
@@ -100,8 +90,8 @@ def getWorkshop(id, workshopDate):
 
 @app.route('/book-workshop', methods=['POST'])
 def bookWorkshop():
-    if bookWorkshop():
-        return "success"
+    # if bookWorkshop():
+    #     return "success"
     return "there was an error"
 
 if __name__ == '__main__':
