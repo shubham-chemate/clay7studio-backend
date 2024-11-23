@@ -41,6 +41,20 @@ FROM WORKSHOP_DESC
 WHERE workshopId='workshop-clay'
 ORDER BY displayPriority
 
+CREATE TABLE SLOTS (
+    workshopId TEXT,
+    workshopStartTime INTEGER,
+    slotsBooked INTEGER
+)
+
+SELECT distinct date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') as workshopTime 
+FROM SLOTS 
+WHERE workshopId='workshop-clay' and workshopStartTime > strftime('%s', 'now', 'start of day', '+12 hours', 'localtime');
+
+select workshopStartTime, slotsBooked
+from slots
+where workshopId='workshop-clay' and date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') = '2024-11-23';
+
 CREATE TABLE bookings (
     id INTEGER,
     workshop_id INTEGER,
