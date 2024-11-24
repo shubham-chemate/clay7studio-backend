@@ -33,6 +33,8 @@ def createWorkshops():
         print(res.fetchall())
     except Exception as e :
         print(e)
+    finally:
+        conn.close()
 
 def createWorkshopDescription():
     conn = sqlite3.connect('data.db')
@@ -79,31 +81,8 @@ def createWorkshopDescription():
         print(res.fetchall())
     except Exception as e:
         print(e)
-
-def createBookings():
-    conn = sqlite3.connect("data.db")
-    cur = conn.cursor()
-    try:
-        res = cur.execute("""
-            CREATE TABLE bookings (
-                id INTEGER,
-                workshop_id INTEGER,
-                date_time INTEGER,
-                no_of_people INTEGER,
-                payment_id TEXT,
-                booked_at INTEGER
-            )
-        """)
-        cur.execute("""
-            INSERT INTO bookings VALUES
-            (1, 1, 1731753000, 2, 'abc-123', 1731771000)
-        """)
-        conn.commit()
-
-        res = cur.execute("SELECT * FROM bookings")
-        print(res.fetchall())
-    except Exception as e:
-        print(traceback.format_exc())
+    finally:
+        conn.close()
 
 def createSlots():
     conn = sqlite3.connect("data.db")
@@ -144,8 +123,73 @@ def createSlots():
         print(res.fetchall())
     except Exception as e:
         print(traceback.format_exc())
+    finally:
+        conn.close()
 
+def createUsers():
+    conn = sqlite3.connect("data.db")
+    cur = conn.cursor()
+    try:
+        cur.execute("DROP TABLE IF EXISTS USERS")
+        conn.commit()
+
+        res = cur.execute("""
+            CREATE TABLE USERS (
+                name TEXT,
+                contact INTEGER,
+                email TEXT
+            )
+        """)
+
+        cur.execute("""
+            INSERT INTO USERS VALUES
+            ('shubham', '1234567890', 's@gmail.com')
+        """)
+        conn.commit()
+        
+
+        res = cur.execute("SELECT * FROM USERS")
+        print(res.fetchall())
+    except Exception as e:
+        print(traceback.format_exc())
+    finally:
+        conn.close()
+
+def createBookings():
+    conn = sqlite3.connect("data.db")
+    cur = conn.cursor()
+    try:
+        cur.execute("DROP TABLE IF EXISTS BOOKINGS")
+        conn.commit()
+
+        res = cur.execute("""
+            CREATE TABLE BOOKINGS (
+                id INTEGER,
+                workshopId INTEGER,
+                workshopDate INTEGER,
+                workshopSlot INTEGER,
+                paymentId TEXT,
+                bookedAt INTEGER,
+                userContact INTEGER
+            )
+        """)
+
+        # cur.execute("""
+        #     INSERT INTO USERS BOOKINGS
+        #     ('shubham', '1234567890', 's@gmail.com')
+        # """)
+        # conn.commit()
+        
+
+        # res = cur.execute("SELECT * FROM slots")
+        # print(res.fetchall())
+    except Exception as e:
+        print(traceback.format_exc())
+    finally:
+        conn.close()
 
 createWorkshops()
 createWorkshopDescription()
 createSlots()
+createUsers()
+createBookings()

@@ -55,29 +55,18 @@ select workshopStartTime, slotsBooked
 from slots
 where workshopId='workshop-clay' and date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') = '2024-11-23';
 
-CREATE TABLE bookings (
+CREATE TABLE USERS (
+    name TEXT,
+    contact INTEGER,
+    email TEXT
+)
+
+CREATE TABLE BOOKINGS (
     id INTEGER,
-    workshop_id INTEGER,
-    date_time INTEGER,
-    no_of_people INTEGER,
-    payment_id TEXT,
-    booked_at INTEGER,
+    workshopId INTEGER,
+    workshopDate INTEGER,
+    workshopSlot INTEGER,
+    paymentId TEXT,
+    bookedAt INTEGER,
+    userContact INTEGER
 )
-
-INSERT INTO bookings VALUES
-(1, 1, 1731753000, 2, 'abc-123', 1731771000)
-
-CREATE TABLE slots (
-    workshop_id INTEGER,
-    date_time INTEGER,
-    booked INTEGER
-)
-
-INSERT INTO slots VALUES
-(1, 1731857400, 1)
-
-
-SELECT max_capacity, booked
-FROM workshops w
-INNER JOIN slots s ON w.id = s.workshop_id
-WHERE w.id=1
