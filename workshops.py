@@ -1,5 +1,6 @@
 import sqlite3
 import traceback
+from datetime import datetime
 
 def getWorkshops_():
     conn = sqlite3.connect("data.db")
@@ -18,123 +19,214 @@ def getWorkshops_():
         conn.close()
 
 def getWorkshopDetails(id, workshopDate):
-    # conn = sqlite3.connect("data.db")
-    # conn.row_factory = sqlite3.Row
-    # cur = conn.cursor()
-    # try:
-    #     res = cur.execute("SELECT id, name, description, duration, fees, max_capacity FROM WORKSHOPS WHERE id=?", (id,))
-    #     rows = res.fetchall()
-    #     workshops = [dict(row) for row in rows]
-    #     if len(workshops)>0:
-    #         return workshops[0]
-    #     return {}
-    # except Exception as e:
-    #     print(traceback.format_exc())
-    #     return 'server-error', 500
-    # finally:
-    #     conn.close()
-    return {
-        'title': 'Fun With Clay',
-        'shortDescription': "Create beatiful pottery art with your hands, don't worry we are there to help you!",
-        'duration': '2 Hrs',
-        'fees': '999/- + GST',
-        'description': [
-            'You will get to craft 1 Piece (usually upto 5 inch)',
-            'You can create Plate, Planter, Mug, Pen Stand or any creative idea of your own',
-            'You will get Glazed Product',
-            'You will receive your final product within 2 weeks',
-            'If you are multiple people attending workshop, please book separately for each'
-        ],
-        'dates': ['Tue, 25 Nov','Wed, 26 Nov','Thu, 27 Nov','Fri, 28 Nov','Sat, 29 Nov','Sun, 30 Nov'],
-        'selectedDate': 'Wed, 26 Nov',
-        'availableSlots': ['12PM to 2PM', '2PM to 4PM', '4PM to 6PM', '6PM to 8PM']
-    }
-    # return {}
+    conn = sqlite3.connect("data.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    try:
+        res = cur.execute("SELECT id, title, shortDescription, duration, fees FROM WORKSHOPS WHERE id=?", (id,))
+        rows = res.fetchall()
+        workshops = [dict(row) for row in rows]
 
-def bookWorkshop():
-        # workshop_id = request.form['workshop-id']
-    # slot_datetime = request.form['slot-datetime']
-    # no_of_people = request.form['no_of_people']
+        if len(workshops)<=0:
+            return {}
+        workshop = workshops[0]
 
-    # if workshop_id is None:
-    #     return 'please provide workshop-id', 400
-    # if slot_datetime is None:
-    #     return 'please provide slot-datetime', 400
-    # if no_of_people is None:
-    #     return 'please provide no-of-people', 400
+        res = cur.execute("SELECT workshopDesc FROM WORKSHOP_DESC WHERE workshopId=? ORDER BY displayPriority", (id,))
+        rows = res.fetchall()
+        desc = [row[0] for row in rows]
+        if len(desc)>0:
+            workshop['description']=desc
 
-    # conn = sqlite3.connect("data.db")
-    # cur = conn.cursor()
+        res = cur.execute("""
+                        SELECT distinct date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') as workshopTime 
+                        FROM SLOTS 
+                        WHERE workshopId=? and workshopStartTime > strftime('%s', 'now', 'start of day', '+0 hours', 'localtime')
+                        LIMIT 6;
+                    """, (id,))
+        rows = res.fetchall()
+        dates = [row[0] for row in rows]
+        workshop['dates']=dates
+        if len(dates)<=0:
+            return workshop
+
+        if workshopDate == "nearest":
+            workshopDate = dates[0]
+
+        workshop['selectedDate']=workshopDate
+
+        res = cur.execute("""
+            select workshopStartTime, slotsRem
+            from slots
+            where workshopId=? and date(workshopStartTime, 'unixepoch', '+0 hours', 'localtime') = ?;
+        """, (id, workshopDate,))
+        rows = res.fetchall()
+        slots=[dict(zip(['startTime', 'slotsRem'], row)) for row in rows]
+        workshop['availableSlots']=slots
+
+        return workshop
+    except Exception as e:
+        print(traceback.format_exc())
+        return 'server-error', 500
+    finally:
+        conn.close()
+
+def addUserToDb(name, contact, mail):
+    conn = sqlite3.connect("data.db")
+    cur = conn.cursor()
+
+    try:
+        res = cur.execute("""
+                        SELECT contact, email
+                        FROM USERS
+                        WHERE contact=?
+                    """, (contact,))
+        rows = res.fetchall()
+        if len(rows)<=0:
+            cur.execute("INSERT INTO USERS VALUES (?, ?, ?)", (name, contact, mail,))
+            conn.commit()
+            print(f'Inserted user [{name},{contact}] into the database')
+        else:
+            if len(mail)>0 and rows[0][1]!=mail:
+                cur.execute("UPDATE USERS SET email=? WHERE contact=?", (mail, contact,))
+                conn.commit()
+                print(f'Updating Email from {rows[0][1]} to {mail} for user [{name},{contact}]')
+            print(f'User [{name},{contact}] is already in database')
+        
+        return True
+    except Exception as e:
+        print(traceback.format_exc())
+        return False
+    finally:
+        conn.close()
+
+def validateWorkshopId(id):
+    conn = sqlite3.connect("data.db")
+    cur = conn.cursor()
+    try:
+        rows = cur.execute("""
+                SELECT id
+                FROM workshops
+                WHERE id=?
+            """,
+            (id,)).fetchall()
+        if len(rows)<1:
+            return False
+        return True
+    except Exception as e:
+        print(traceback.format_exc())
+        return False
+    finally:
+        conn.close()
+
+def checkSlotAvailibility(workshopId, workshopDate, workshopSlot):
+    conn = sqlite3.connect("data.db")
+    cur = conn.cursor()
+    try:
+        dtmStr = f'{workshopDate} {workshopSlot}'
+        dtmObj = datetime.strptime(dtmStr, "%Y-%m-%d %I:%M %p")
+        workshopStartTime = dtmObj.timestamp()
+        print(f'Workshop start time is {workshopStartTime}')
+
+        rows = cur.execute("""
+                SELECT slotsRem
+                FROM SLOTS
+                WHERE workshopId=? AND workshopStartTime=?
+            """, (workshopId, workshopStartTime,)).fetchall()
+        if len(rows)<1 or rows[0][0]<1:
+            return False
+        
+        res = cur.execute("""
+                UPDATE SLOTS
+                SET slotsRem=slotsRem-1
+                WHERE workshopId=? AND workshopStartTime=?
+            """, (workshopId, workshopStartTime,)).fetchall()
+        conn.commit()
+
+        return True
+    except Exception as e:
+        print(traceback.format_exc())
+        return False
+    finally:
+        conn.close()
+
+def doPayment():
+    return 'placeholder-paymentId'
+
+def addBooking(workshopId, workshopDate, workshopSlot, paymentId, userContact):
+    conn = sqlite3.connect("data.db")
+    cur = conn.cursor()
+    try:
+        bookedAt = int(datetime.now().timestamp())        
+        res = cur.execute("""
+                INSERT INTO BOOKINGS
+                VALUES (?,?,?,?,?,?,?)
+            """, ('123-abc', workshopId, workshopDate, workshopSlot, paymentId, bookedAt, userContact,)).fetchall()
+        conn.commit()
+
+        return True
+    except Exception as e:
+        print(traceback.format_exc())
+        return False
+    finally:
+        conn.close()
+
+def releaseSlot(workshopId, workshopDate, workshopSlot):
+    conn = sqlite3.connect("data.db")
+    cur = conn.cursor()
+    try:
+        dtmStr = f'{workshopDate} {workshopSlot}'
+        dtmObj = datetime.strptime(dtmStr, "%Y-%m-%d %I:%M %p")
+        workshopStartTime = dtmObj.timestamp()
+        print(f'Workshop start time is {workshopStartTime}')
+
+        rows = cur.execute("""
+                SELECT slotsRem
+                FROM SLOTS
+                WHERE workshopId=? AND workshopStartTime=?
+            """, (workshopId, workshopStartTime,)).fetchall()
+        if len(rows)<1 or rows[0][0]<1:
+            return False
+        
+        res = cur.execute("""
+                UPDATE SLOTS
+                SET slotsRem=slotsRem+1
+                WHERE workshopId=? AND workshopStartTime=?
+            """, (workshopId, workshopStartTime,)).fetchall()
+        conn.commit()
+
+        return True
+    except Exception as e:
+        print(traceback.format_exc())
+        return False
+    finally:
+        conn.close()
+
+def bookWorkshop_(workshopDetails):
+    userContact = workshopDetails['userContact'].strip()
+    userName = workshopDetails['userName'].strip()
+    userEmail = workshopDetails['userEmail'].strip()
+    workshopId = workshopDetails['workshopId'].strip()
+    workshopDate = workshopDetails['workshopDate'].strip()
+    workshopSlot = workshopDetails['workshop-slot'].strip()
+
+    if not addUserToDb(userName, userContact, userEmail):
+        # return 'server-error', 500
+        return False
     
-    # rows = cur.execute("""
-    #         SELECT max_capacity
-    #         FROM workshops
-    #         WHERE id=?
-    #     """,
-    #     (workshop_id)).fetchall()
-    # if len(rows)<1:
-    #     conn.close()
-    #     return 'workshop-id is not present in database', 400
+    if not validateWorkshopId(workshopId):
+        # return 'invalid workshop id', 400
+        return False
     
-    # max_capacity = int(rows[0][0])
-
-    # rows = cur.execute("""
-    #         SELECT booked
-    #         FROM slots
-    #         WHERE workshop_id=? AND date_time=?
-    #     """,
-    #     (workshop_id, slot_datetime)).fetchall()
-
-    # if len(rows)<1:
-    #     conn.close()
-    #     return 'no slot present for workshop id: '+workshop_id, 400
+    if not checkSlotAvailibility(workshopId, workshopDate, workshopSlot):
+        # return 'slot not available', 500
+        return False
     
-    # booked = int(rows[0][0])
-
-    # if booked>=max_capacity:
-    #     conn.close()
-    #     return "no-slots-left for workshop id: " + workshop_id
-    
-    # cur.execute("""
-    #         UPDATE slots
-    #         SET booked=booked+1
-    #         WHERE workshop_id=? AND date_time=?
-    #     """,
-    #     (workshop_id, slot_datetime))
-    
-    # conn.commit()
-
-    # def doPayment():
-    #     tl=30
-    #     print(f'Please complete your payment within {tl} secs')
-    #     time.sleep(tl)
-    #     import random
-    #     n = random.choice([0,1])
-    #     if n==0:
-    #         print("Payment Failure")
-    #         return False
-    #     else:
-    #         print("Payment Success")
-    #         return True
-
-    # if doPayment():
-    #     cur.execute("""
-    #             INSERT INTO bookings
-    #             VALUES (1,?,?,?,'abc-123',1234)
-    #         """,
-    #         (workshop_id, slot_datetime,no_of_people))
-    #     conn.commit()
-    #     conn.close()
-    #     return 'booked-successfully'
-    # else:
-    #     cur.execute("""
-    #         UPDATE slots
-    #         SET booked=booked-1
-    #         WHERE workshop_id=? AND date_time=?
-    #     """,
-    #     (workshop_id, slot_datetime))
-    
-    #     conn.commit()
-    #     conn.close()
-    #     return 'payment-failure'
-    return "booked"
+    paymentId = doPayment()
+    if paymentId is None or paymentId == '':
+        if not releaseSlot(workshopId, workshopDate, workshopSlot):
+            print(f"some error occured while releasing the slot for [{workshopId},{workshopDate},{workshopSlot}], user [{userName},{userContact},{userEmail}]")
+        return False
+    else:
+        if not addBooking(workshopId, workshopDate, workshopSlot, paymentId, userContact):
+            print(f"some error occured while adding record to bookings table for workshop [{workshopId},{workshopDate},{workshopSlot}] ,user [{userName},{userContact},{userEmail}], payementId [{paymentId}]")
+        return True
