@@ -103,11 +103,11 @@ def bookWorkshop():
     if workshopDate is None or workshopDate == '':
         return 'WorkshopDate is not present', 400
     if workshopSlot is None or workshopSlot == '':
-        return 'WorkshopSlot is not present'
+        return 'WorkshopSlot is not present', 400
 
-    # if bookWorkshop():
-    #     return "success"
-    return "booking-in-progress"
+    if bookWorkshop_(request.form):
+        return "booked-successfully"
+    return "booking failed"
 
 if __name__ == '__main__':
     app.run(debug=True)
